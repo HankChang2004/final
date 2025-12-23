@@ -8,7 +8,18 @@ from datetime import datetime
 import shutil
 
 app = Flask(__name__, static_folder='static')
-CORS(app)
+
+# 增強 CORS 設定以支援跨域請求
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"]
+    }
+})
+
+# 設定最大上傳大小 (500MB)
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 
 # Configuration
 UPLOAD_FOLDER = os.path.expanduser('~/project/uploads')

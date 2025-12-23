@@ -528,9 +528,9 @@
     </div>
 
     <script>
-        // 後端 API 位址 - 如果是本地運行設為空字串，如果是遠端後端則設定 URL
-        // 例如使用 ngrok: const API_BASE = 'https://xxxx.ngrok.io';
-        let API_BASE = localStorage.getItem('apiBase') || '';
+        // 後端 API 位址
+        const DEFAULT_API = 'https://unirritably-unfoul-chere.ngrok-free.dev';
+        let API_BASE = localStorage.getItem('apiBase') || DEFAULT_API;
         
         let uploadedFilename = null;
         let startTime = null;
