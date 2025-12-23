@@ -533,6 +533,9 @@
             try {
                 const response = await fetch(`${API_BASE}/upload`, {
                     method: 'POST',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: formData
                 });
 
@@ -540,7 +543,18 @@
 
                 if (data.success) {
                     uploadedFilename = data.filename;
-                    video.src = `${API_BASE}/uploads/${data.filename}`;
+                    
+                    // 使用 fetch 載入影片以繞過 ngrok 警告頁面
+                    showStatus('info', '正在載入影片...');
+                    const videoResponse = await fetch(`${API_BASE}/uploads/${data.filename}`, {
+                        headers: {
+                            'ngrok-skip-browser-warning': 'true'
+                        }
+                    });
+                    const videoBlob = await videoResponse.blob();
+                    const videoUrl = URL.createObjectURL(videoBlob);
+                    video.src = videoUrl;
+                    
                     document.getElementById('videoSection').style.display = 'block';
                     document.getElementById('uploadSection').style.display = 'none';
                     showStatus('success', '影片上傳成功！請標記抬腳和球離手的時間點。');
@@ -694,7 +708,8 @@
                 const response = await fetch(`${API_BASE}/process`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify({
                         filename: uploadedFilename,
@@ -728,7 +743,11 @@
 
         async function loadResults() {
             try {
-                const response = await fetch(`${API_BASE}/results`);
+                const response = await fetch(`${API_BASE}/results`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
                 const data = await response.json();
 
                 document.getElementById('resultsSection').style.display = 'block';
