@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from flask import Flask, request, jsonify, send_from_directory, send_file, make_response, Response
 from flask_cors import CORS
 import os
@@ -9,7 +8,6 @@ import shutil
 
 app = Flask(__name__, static_folder='static')
 
-# 增強 CORS 設定以支援跨域請求
 CORS(app, resources={
     r"/*": {
         "origins": "*",
@@ -20,16 +18,13 @@ CORS(app, resources={
     }
 })
 
-# 設定最大上傳大小 (500MB)
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 
-# Configuration
 UPLOAD_FOLDER = os.path.expanduser('~/project/uploads')
 OUTPUT_FOLDER = os.path.expanduser('~/project/trimmed_videos')
 ALPHAPOSE_OUTPUT = os.path.expanduser('~/project/alphapose_output')
 MOTIONBERT_OUTPUT = os.path.expanduser('~/project/motionbert_output')
 
-# Ensure directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 os.makedirs(ALPHAPOSE_OUTPUT, exist_ok=True)
@@ -46,7 +41,6 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
-    """Upload a video file"""
     if 'video' not in request.files:
         return jsonify({'error': 'No video file provided'}), 400
     
@@ -57,7 +51,6 @@ def upload_video():
     if not allowed_file(file.filename):
         return jsonify({'error': 'Invalid file type'}), 400
     
-    # Generate unique filename
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     unique_id = str(uuid.uuid4())[:8]
     ext = file.filename.rsplit('.', 1)[1].lower()
@@ -74,7 +67,6 @@ def upload_video():
 
 @app.route('/uploads/<filename>')
 def serve_video(filename):
-    """Serve uploaded video files with proper CORS headers"""
     response = make_response(send_from_directory(UPLOAD_FOLDER, filename))
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Accept-Ranges'] = 'bytes'
@@ -82,7 +74,6 @@ def serve_video(filename):
 
 @app.route('/process', methods=['POST'])
 def process_video():
-    """Trim video and run analysis script"""
     data = request.json
     
     if not data:
@@ -102,7 +93,6 @@ def process_video():
     if not os.path.exists(input_path):
         return jsonify({'error': 'Video file not found'}), 404
     
-    # Generate output filename
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     output_filename = f"trimmed_{timestamp}_{filename}"
     output_path = os.path.join(OUTPUT_FOLDER, output_filename)
@@ -111,7 +101,6 @@ def process_video():
         # Calculate duration
         duration = float(end_time) - float(start_time)
         
-        # Trim video using ffmpeg
         ffmpeg_cmd = [
             'ffmpeg', '-y',
             '-i', input_path,
@@ -126,8 +115,7 @@ def process_video():
         result = subprocess.run(ffmpeg_cmd, capture_output=True, text=True)
         if result.returncode != 0:
             return jsonify({'error': f'FFmpeg error: {result.stderr}'}), 500
-        
-        # Clear previous output files
+
         for f in os.listdir(ALPHAPOSE_OUTPUT):
             fpath = os.path.join(ALPHAPOSE_OUTPUT, f)
             if os.path.isfile(fpath):
@@ -141,8 +129,7 @@ def process_video():
                 os.remove(fpath)
             elif os.path.isdir(fpath):
                 shutil.rmtree(fpath)
-        
-        # Run the analysis script
+
         script_path = os.path.expanduser('~/project/script.sh')
         script_result = subprocess.run(
             ['bash', script_path, output_path],
@@ -156,8 +143,7 @@ def process_video():
                 'error': f'Script error: {script_result.stderr}',
                 'stdout': script_result.stdout
             }), 500
-        
-        # 預測球速 (目前為假定值，之後可接入實際模型)
+        #模型有點問題，先設預設值
         predicted_speed_mph = 88
         predicted_speed_kmh = round(predicted_speed_mph * 1.60934, 1)
         
@@ -180,17 +166,14 @@ def process_video():
 
 @app.route('/results')
 def get_results():
-    """Get the analysis results"""
     results = {
         'alphapose': [],
         'motionbert': []
     }
     
-    # List AlphaPose output files
     if os.path.exists(ALPHAPOSE_OUTPUT):
         results['alphapose'] = os.listdir(ALPHAPOSE_OUTPUT)
-    
-    # List MotionBERT output files
+
     if os.path.exists(MOTIONBERT_OUTPUT):
         results['motionbert'] = os.listdir(MOTIONBERT_OUTPUT)
     
