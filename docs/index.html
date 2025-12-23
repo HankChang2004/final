@@ -411,16 +411,8 @@
     <div class="container">
         <h1>⚾ 投球動作分析系統</h1>
 
-        <!-- Server Configuration -->
-        <div class="card">
-            <h2>🔌 伺服器設定</h2>
-            <div class="server-config">
-                <input type="text" id="serverUrl" placeholder="後端伺服器網址 (例如: http://localhost:5000)" value="http://localhost:5000">
-                <button class="btn btn-primary" onclick="testConnection()">測試連線</button>
-                <span class="connection-status disconnected" id="connectionStatus">未連線</span>
-            </div>
-            <p style="color: #888; font-size: 0.9rem;">請確保後端伺服器正在運行，並輸入正確的網址。</p>
-        </div>
+        <!-- Server Configuration (hidden, using fixed URL) -->
+        <input type="hidden" id="serverUrl" value="https://unirritably-unfoul-chere.ngrok-free.app">
 
         <!-- Upload Section -->
         <div class="card" id="uploadSection">
