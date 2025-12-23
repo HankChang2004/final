@@ -541,7 +541,10 @@
         async function testConnection() {
             const statusEl = document.getElementById('connectionStatus');
             try {
-                const response = await fetch(`${getServerUrl()}/`, { mode: 'cors' });
+                const response = await fetch(`${getServerUrl()}/`, { 
+                    mode: 'cors',
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
                 if (response.ok) {
                     statusEl.textContent = '已連線 ✓';
                     statusEl.className = 'connection-status connected';
@@ -594,7 +597,10 @@
                 const response = await fetch(`${getServerUrl()}/upload`, {
                     method: 'POST',
                     body: formData,
-                    mode: 'cors'
+                    mode: 'cors',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
                 });
 
                 const data = await response.json();
@@ -755,7 +761,8 @@
                 const response = await fetch(`${getServerUrl()}/process`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify({
                         filename: uploadedFilename,
@@ -790,7 +797,10 @@
 
         async function loadResults() {
             try {
-                const response = await fetch(`${getServerUrl()}/results`, { mode: 'cors' });
+                const response = await fetch(`${getServerUrl()}/results`, { 
+                    mode: 'cors',
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
                 const data = await response.json();
 
                 document.getElementById('resultsSection').style.display = 'block';
