@@ -364,54 +364,11 @@
                 font-size: 1.8rem;
             }
         }
-        .settings-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 15px;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .settings-bar input {
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.3);
-            color: #fff;
-            width: 300px;
-        }
-
-        .settings-bar input::placeholder {
-            color: #888;
-        }
-
-        .connection-status {
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.85rem;
-        }
-
-        .connection-status.connected {
-            background: rgba(102, 187, 106, 0.3);
-            color: #66bb6a;
-        }
-
-        .connection-status.disconnected {
-            background: rgba(244, 67, 54, 0.3);
-            color: #f44336;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>⚾ 投球動作分析系統</h1>
-
-        <!-- Settings Bar -->
-        <div class="settings-bar">
-            <span class="connection-status disconnected" id="connectionStatus">未連接</span>
-            <input type="text" id="apiBaseInput" placeholder="後端網址 (例如: http://localhost:5000)">
-            <button class="btn btn-primary btn-small" onclick="setApiBase()">連接</button>
-        </div>
 
         <!-- Upload Section -->
         <div class="card" id="uploadSection">
@@ -536,44 +493,6 @@
         let startTime = null;
         let endTime = null;
         const video = document.getElementById('videoPlayer');
-        
-        // 初始化 API Base 輸入框
-        document.getElementById('apiBaseInput').value = API_BASE;
-        
-        // 檢查連接狀態
-        async function checkConnection() {
-            const statusEl = document.getElementById('connectionStatus');
-            if (!API_BASE) {
-                statusEl.textContent = '未設定';
-                statusEl.className = 'connection-status disconnected';
-                return;
-            }
-            try {
-                const response = await fetch(`${API_BASE}/results`, { method: 'GET' });
-                if (response.ok) {
-                    statusEl.textContent = '已連接';
-                    statusEl.className = 'connection-status connected';
-                } else {
-                    statusEl.textContent = '連接失敗';
-                    statusEl.className = 'connection-status disconnected';
-                }
-            } catch (e) {
-                statusEl.textContent = '無法連接';
-                statusEl.className = 'connection-status disconnected';
-            }
-        }
-        
-        function setApiBase() {
-            const input = document.getElementById('apiBaseInput').value.trim();
-            // 移除結尾的斜線
-            API_BASE = input.replace(/\/+$/, '');
-            localStorage.setItem('apiBase', API_BASE);
-            checkConnection();
-            showStatus('info', `後端位址已設定為: ${API_BASE || '(本地)'}`);
-        }
-        
-        // 頁面載入時檢查連接
-        checkConnection();
 
         // Upload handling
         const uploadArea = document.getElementById('uploadArea');
