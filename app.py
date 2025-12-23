@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_from_directory, send_file, Response
 from flask_cors import CORS
 import os
 import subprocess
@@ -13,8 +13,10 @@ app = Flask(__name__, static_folder='static')
 CORS(app, resources={
     r"/*": {
         "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"]
+        "methods": ["GET", "POST", "OPTIONS", "HEAD"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Range"],
+        "expose_headers": ["Content-Range", "Accept-Ranges", "Content-Length"],
+        "supports_credentials": False
     }
 })
 
@@ -59,21 +61,125 @@ def upload_video():
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     unique_id = str(uuid.uuid4())[:8]
     ext = file.filename.rsplit('.', 1)[1].lower()
-    filename = f"video_{timestamp}_{unique_id}.{ext}"
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    original_filename = f"video_{timestamp}_{unique_id}_original.{ext}"
+    original_filepath = os.path.join(UPLOAD_FOLDER, original_filename)
     
-    file.save(filepath)
+    file.save(original_filepath)
     
-    return jsonify({
-        'success': True,
-        'filename': filename,
-        'filepath': filepath
-    })
+    # 轉換為瀏覽器相容的 H.264 MP4 格式
+    converted_filename = f"video_{timestamp}_{unique_id}.mp4"
+    converted_filepath = os.path.join(UPLOAD_FOLDER, converted_filename)
+    
+    try:
+        # 使用 ffmpeg 轉換為 H.264 MP4
+        ffmpeg_cmd = [
+            'ffmpeg', '-y',
+            '-i', original_filepath,
+            '-c:v', 'libx264',
+            '-preset', 'fast',
+            '-crf', '23',
+            '-c:a', 'aac',
+            '-movflags', '+faststart',  # 讓影片可以邊下載邊播放
+            converted_filepath
+        ]
+        result = subprocess.run(ffmpeg_cmd, capture_output=True, text=True, timeout=300)
+        
+        if result.returncode == 0:
+            # 轉換成功，刪除原始檔案
+            os.remove(original_filepath)
+            return jsonify({
+                'success': True,
+                'filename': converted_filename,
+                'filepath': converted_filepath
+            })
+        else:
+            # 轉換失敗，使用原始檔案
+            os.rename(original_filepath, os.path.join(UPLOAD_FOLDER, f"video_{timestamp}_{unique_id}.{ext}"))
+            return jsonify({
+                'success': True,
+                'filename': f"video_{timestamp}_{unique_id}.{ext}",
+                'filepath': os.path.join(UPLOAD_FOLDER, f"video_{timestamp}_{unique_id}.{ext}"),
+                'warning': 'Video conversion failed, using original format'
+            })
+    except subprocess.TimeoutExpired:
+        # 超時，使用原始檔案
+        return jsonify({
+            'success': True,
+            'filename': original_filename,
+            'filepath': original_filepath,
+            'warning': 'Video conversion timed out'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': True,
+            'filename': original_filename,
+            'filepath': original_filepath,
+            'warning': f'Video conversion error: {str(e)}'
+        })
 
 @app.route('/uploads/<filename>')
 def serve_video(filename):
-    """Serve uploaded video files"""
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    """Serve uploaded video files with proper MIME type and range support"""
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    
+    # 取得檔案副檔名來設定 MIME type
+    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    mime_types = {
+        'mp4': 'video/mp4',
+        'webm': 'video/webm',
+        'mov': 'video/quicktime',
+        'avi': 'video/x-msvideo',
+        'mkv': 'video/x-matroska'
+    }
+    mimetype = mime_types.get(ext, 'video/mp4')
+    
+    file_size = os.path.getsize(filepath)
+    
+    # 處理 Range 請求以支援影片串流
+    range_header = request.headers.get('Range', None)
+    if range_header:
+        byte_start = 0
+        byte_end = file_size - 1
+        
+        match = range_header.replace('bytes=', '').split('-')
+        if match[0]:
+            byte_start = int(match[0])
+        if match[1]:
+            byte_end = int(match[1])
+        
+        length = byte_end - byte_start + 1
+        
+        def generate():
+            with open(filepath, 'rb') as f:
+                f.seek(byte_start)
+                remaining = length
+                while remaining > 0:
+                    chunk_size = min(8192, remaining)
+                    data = f.read(chunk_size)
+                    if not data:
+                        break
+                    remaining -= len(data)
+                    yield data
+        
+        response = Response(
+            generate(),
+            status=206,
+            mimetype=mimetype,
+            direct_passthrough=True
+        )
+        response.headers.add('Content-Range', f'bytes {byte_start}-{byte_end}/{file_size}')
+        response.headers.add('Accept-Ranges', 'bytes')
+        response.headers.add('Content-Length', length)
+        return response
+    
+    return send_from_directory(
+        UPLOAD_FOLDER, 
+        filename, 
+        mimetype=mimetype,
+        as_attachment=False
+    )
 
 @app.route('/process', methods=['POST'])
 def process_video():
