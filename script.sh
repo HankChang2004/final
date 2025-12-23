@@ -11,6 +11,7 @@ conda activate alphapose
 cd ~/AlphaPose
 bash scripts/inference.sh "${VIDEODIR}" ~/project/alphapose_output/
 conda deactivate
+rm -f ~/AlphaPose/examples/demo/output_fixed.mp4
 
 # Run MotionBERT
 conda activate motionbert
