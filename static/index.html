@@ -386,7 +386,7 @@
             <h2>🎥 影片預覽與時間標記</h2>
             
             <div class="video-container">
-                <video id="videoPlayer" controls crossorigin="anonymous" playsinline></video>
+                <video id="videoPlayer" controls></video>
             </div>
 
             <div class="current-time-display">
@@ -540,30 +540,7 @@
 
                 if (data.success) {
                     uploadedFilename = data.filename;
-                    const videoUrl = `${API_BASE}/uploads/${data.filename}`;
-                    
-                    // 清除舊的 source
-                    video.innerHTML = '';
-                    
-                    // 創建 source 元素
-                    const source = document.createElement('source');
-                    source.src = videoUrl;
-                    source.type = 'video/mp4';
-                    video.appendChild(source);
-                    
-                    // 重新載入影片
-                    video.load();
-                    
-                    // 監聽錯誤
-                    video.onerror = function() {
-                        console.error('Video error:', video.error);
-                        showStatus('error', `影片載入失敗: ${video.error ? video.error.message : '未知錯誤'}`);
-                    };
-                    
-                    video.onloadeddata = function() {
-                        console.log('Video loaded successfully');
-                    };
-                    
+                    video.src = `${API_BASE}/uploads/${data.filename}`;
                     document.getElementById('videoSection').style.display = 'block';
                     document.getElementById('uploadSection').style.display = 'none';
                     showStatus('success', '影片上傳成功！請標記抬腳和球離手的時間點。');
