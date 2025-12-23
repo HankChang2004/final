@@ -11,7 +11,6 @@
             box-sizing: border-box;
         }
 
-        /* QR Code 右下角固定樣式 */
         .qr-code-corner {
             position: fixed;
             bottom: 20px;
@@ -347,7 +346,6 @@
             </div>
         </div>
 
-        <!-- Video Player Section -->
         <div class="card" id="videoSection" style="display: none;">
             <h2>影片預覽與時間標記</h2>
             
@@ -423,7 +421,6 @@
     </div>
 
     <script>
-        // 後端 API 位址
         const DEFAULT_API = 'https://unirritably-unfoul-chere.ngrok-free.dev';
         let API_BASE = localStorage.getItem('apiBase') || DEFAULT_API;
         
@@ -504,7 +501,6 @@
             }
         }
 
-        // Video controls
         video.addEventListener('timeupdate', () => {
             document.getElementById('currentTimeDisplay').textContent = video.currentTime.toFixed(3);
             updateTimeline();
@@ -583,14 +579,12 @@
             }
         }
 
-        // Timeline click to seek
         document.getElementById('timeline').addEventListener('click', (e) => {
             const rect = e.target.getBoundingClientRect();
             const percent = (e.clientX - rect.left) / rect.width;
             video.currentTime = percent * video.duration;
         });
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             // Ignore if typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -663,7 +657,6 @@
                 if (data.success) {
                     updateProgress(100, '分析完成！');
                     
-                    // 顯示預測結果
                     let resultMessage = `處理完成！影片時長: ${data.duration.toFixed(3)} 秒`;
                     if (data.prediction) {
                         resultMessage += `<br><br><strong>預測球速: ${data.prediction.speed_mph} mph (${data.prediction.speed_kmh} km/h)</strong>`;
@@ -696,7 +689,6 @@
         }
     </script>
     
-    <!-- QR Code 右下角固定位置 -->
     <div class="qr-code-corner"><a href="https://docs.google.com/presentation/d/1RoQt6F8I3_kiYopE0jx7GXyL8ROhwYqaAoJYUiV5yq0/edit?usp=sharing">
         <img src="images/qrcode.png" alt="QR Code" />
     </div>
