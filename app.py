@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_from_directory, send_file, make_response, Response
 from flask_cors import CORS
 import os
 import subprocess
@@ -13,8 +13,10 @@ app = Flask(__name__, static_folder='static')
 CORS(app, resources={
     r"/*": {
         "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"]
+        "methods": ["GET", "POST", "OPTIONS", "HEAD"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Range"],
+        "expose_headers": ["Content-Range", "Accept-Ranges", "Content-Length"],
+        "supports_credentials": False
     }
 })
 
@@ -72,8 +74,11 @@ def upload_video():
 
 @app.route('/uploads/<filename>')
 def serve_video(filename):
-    """Serve uploaded video files"""
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    """Serve uploaded video files with proper CORS headers"""
+    response = make_response(send_from_directory(UPLOAD_FOLDER, filename))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Accept-Ranges'] = 'bytes'
+    return response
 
 @app.route('/process', methods=['POST'])
 def process_video():
