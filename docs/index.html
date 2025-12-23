@@ -724,7 +724,13 @@
 
                 if (data.success) {
                     updateProgress(100, '分析完成！');
-                    showStatus('success', `✅ 處理完成！影片時長: ${data.duration.toFixed(3)} 秒`);
+                    
+                    // 顯示預測結果
+                    let resultMessage = `✅ 處理完成！影片時長: ${data.duration.toFixed(3)} 秒`;
+                    if (data.prediction) {
+                        resultMessage += `<br><br>🎯 <strong>預測球速: ${data.prediction.speed_mph} mph (${data.prediction.speed_kmh} km/h)</strong>`;
+                    }
+                    showStatus('success', resultMessage, true);
                     loadResults();
                 } else {
                     showStatus('error', `處理失敗: ${data.error}`);
@@ -772,10 +778,14 @@
             }
         }
 
-        function showStatus(type, message) {
+        function showStatus(type, message, isHtml = false) {
             const statusEl = document.getElementById('statusMessage');
             statusEl.className = `status-message ${type}`;
-            statusEl.textContent = message;
+            if (isHtml) {
+                statusEl.innerHTML = message;
+            } else {
+                statusEl.textContent = message;
+            }
             statusEl.style.display = 'block';
         }
     </script>

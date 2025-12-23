@@ -14,7 +14,7 @@ CORS(app, resources={
     r"/*": {
         "origins": "*",
         "methods": ["GET", "POST", "OPTIONS", "HEAD"],
-        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Range"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Range", "ngrok-skip-browser-warning"],
         "expose_headers": ["Content-Range", "Accept-Ranges", "Content-Length"],
         "supports_credentials": False
     }
@@ -157,6 +157,10 @@ def process_video():
                 'stdout': script_result.stdout
             }), 500
         
+        # 預測球速 (目前為假定值，之後可接入實際模型)
+        predicted_speed_mph = 88
+        predicted_speed_kmh = round(predicted_speed_mph * 1.60934, 1)
+        
         return jsonify({
             'success': True,
             'message': 'Video processed successfully',
@@ -164,7 +168,11 @@ def process_video():
             'start_time': start_time,
             'end_time': end_time,
             'duration': duration,
-            'script_output': script_result.stdout
+            'script_output': script_result.stdout,
+            'prediction': {
+                'speed_mph': predicted_speed_mph,
+                'speed_kmh': predicted_speed_kmh
+            }
         })
         
     except Exception as e:
