@@ -11,6 +11,24 @@
             box-sizing: border-box;
         }
 
+        /* QR Code 右下角固定樣式 */
+        .qr-code-corner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-code-corner img {
+            width: 120px;
+            height: 120px;
+            display: block;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -677,5 +695,10 @@
             statusEl.style.display = 'block';
         }
     </script>
+    
+    <!-- QR Code 右下角固定位置 -->
+    <div class="qr-code-corner">
+        <img src="images/qrcode.png" alt="QR Code" />
+    </div>
 </body>
 </html>
