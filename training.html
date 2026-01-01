@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>棒球訓練 - 揮棒反應訓練</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="training.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="nav-bar">
+                <a href="index.html" class="nav-link">⚾ 動作分析</a>
+                <a href="training.html" class="nav-link active">🏋️ 揮棒訓練</a>
+            </nav>
+            <h1>🏏 揮棒反應訓練</h1>
+            <p class="subtitle">訓練你的揮棒決策能力 - 聽到 GO 就揮棒，聽到 STOP 就收棒</p>
+        </header>
+
+        <main>
+            <!-- 訓練設定 -->
+            <section class="step" id="settingsSection">
+                <div class="step-header">
+                    <span class="step-number">⚙️</span>
+                    <h2>訓練設定</h2>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="roundCount">訓練回合數</label>
+                        <select id="roundCount">
+                            <option value="5">5 回合</option>
+                            <option value="10" selected>10 回合</option>
+                            <option value="15">15 回合</option>
+                            <option value="20">20 回合</option>
+                            <option value="0">無限模式</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="intervalTime">間隔時間（秒）</label>
+                        <select id="intervalTime">
+                            <option value="2">2 秒</option>
+                            <option value="3" selected>3 秒</option>
+                            <option value="4">4 秒</option>
+                            <option value="5">5 秒</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="goRatio">GO 出現機率</label>
+                        <select id="goRatio">
+                            <option value="30">30%</option>
+                            <option value="50" selected>50%</option>
+                            <option value="70">70%</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="voiceSpeed">語音速度</label>
+                        <select id="voiceSpeed">
+                            <option value="0.8">慢速</option>
+                            <option value="1" selected>正常</option>
+                            <option value="1.2">快速</option>
+                            <option value="1.5">極快</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-large" id="startTrainingBtn">
+                        ▶️ 開始訓練
+                    </button>
+                </div>
+            </section>
+
+            <!-- 訓練進行中 -->
+            <section class="step" id="trainingSection" style="display: none;">
+                <div class="training-display">
+                    <div class="round-info">
+                        <span id="currentRound">0</span> / <span id="totalRounds">10</span>
+                    </div>
+                    
+                    <div class="command-display" id="commandDisplay">
+                        準備開始...
+                    </div>
+                    
+                    <div class="visual-indicator" id="visualIndicator">
+                        <div class="indicator-circle"></div>
+                    </div>
+
+                    <div class="countdown-display" id="countdownDisplay">
+                        
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="pauseBtn">⏸️ 暫停</button>
+                    <button class="btn btn-danger" id="stopTrainingBtn">⏹️ 結束訓練</button>
+                </div>
+            </section>
+
+            <!-- 訓練結果 -->
+            <section class="step" id="resultSection" style="display: none;">
+                <div class="step-header">
+                    <span class="step-number">📊</span>
+                    <h2>訓練完成</h2>
+                </div>
+                
+                <div class="result-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalRoundsResult">0</div>
+                        <div class="stat-label">總回合數</div>
+                    </div>
+                    <div class="stat-card go">
+                        <div class="stat-value" id="goCount">0</div>
+                        <div class="stat-label">GO 次數</div>
+                    </div>
+                    <div class="stat-card stop">
+                        <div class="stat-value" id="stopCount">0</div>
+                        <div class="stat-label">STOP 次數</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="restartBtn">🔄 再次訓練</button>
+                    <button class="btn btn-secondary" id="backToSettingsBtn">⚙️ 調整設定</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>棒球訓練系統 © 2026</p>
+        </footer>
+    </div>
+
+    <script src="training.js"></script>
+</body>
+</html>
