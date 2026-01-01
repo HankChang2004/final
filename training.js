@@ -12,7 +12,7 @@ class SwingTraining {
         this.roundCountSelect = document.getElementById('roundCount');
         this.intervalTimeSelect = document.getElementById('intervalTime');
         this.goRatioSelect = document.getElementById('goRatio');
-        this.voiceSpeedSelect = document.getElementById('voiceSpeed');
+        this.rhythmSpeedSelect = document.getElementById('rhythmSpeed');
         
         this.currentRoundEl = document.getElementById('currentRound');
         this.totalRoundsEl = document.getElementById('totalRounds');
@@ -36,7 +36,7 @@ class SwingTraining {
         this.totalRounds = 10;
         this.intervalTime = 3;
         this.goRatio = 50;
-        this.voiceSpeed = 1;
+        this.rhythmDelay = 700; // 節奏間隔（毫秒）
         this.goCount = 0;
         this.stopCount = 0;
         this.timeoutId = null;
@@ -85,7 +85,7 @@ class SwingTraining {
         this.synth.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = this.voiceSpeed;
+        utterance.rate = 1.2; // 固定語音速度
         utterance.pitch = 1;
         utterance.volume = 1;
         
@@ -107,7 +107,7 @@ class SwingTraining {
         this.totalRounds = parseInt(this.roundCountSelect.value);
         this.intervalTime = parseInt(this.intervalTimeSelect.value);
         this.goRatio = parseInt(this.goRatioSelect.value);
-        this.voiceSpeed = parseFloat(this.voiceSpeedSelect.value);
+        this.rhythmDelay = parseInt(this.rhythmSpeedSelect.value);
         
         // 重置狀態
         this.currentRound = 0;
@@ -158,38 +158,35 @@ class SwingTraining {
     playSequence(isGo) {
         // 顯示和播放 "1"
         this.showCommand('1', 'counting');
-        this.speak('1', () => {
+        this.speak('1');
+        
+        // 使用節奏延遲控制間隔
+        setTimeout(() => {
             if (!this.isRunning || this.isPaused) return;
             
-            // 短暫延遲後顯示 "2"
+            // 顯示和播放 "2"
+            this.showCommand('2', 'counting');
+            this.speak('2');
+            
             setTimeout(() => {
                 if (!this.isRunning || this.isPaused) return;
                 
-                this.showCommand('2', 'counting');
-                this.speak('2', () => {
-                    if (!this.isRunning || this.isPaused) return;
-                    
-                    // 短暫延遲後顯示 GO 或 STOP
-                    setTimeout(() => {
-                        if (!this.isRunning || this.isPaused) return;
-                        
-                        if (isGo) {
-                            this.showCommand('GO!', 'go');
-                            this.goCount++;
-                            this.speak('GO', () => {
-                                this.scheduleNextRound();
-                            });
-                        } else {
-                            this.showCommand('STOP!', 'stop');
-                            this.stopCount++;
-                            this.speak('STOP', () => {
-                                this.scheduleNextRound();
-                            });
-                        }
-                    }, 300);
-                });
-            }, 400);
-        });
+                // 顯示 GO 或 STOP
+                if (isGo) {
+                    this.showCommand('GO!', 'go');
+                    this.goCount++;
+                    this.speak('GO', () => {
+                        this.scheduleNextRound();
+                    });
+                } else {
+                    this.showCommand('STOP!', 'stop');
+                    this.stopCount++;
+                    this.speak('STOP', () => {
+                        this.scheduleNextRound();
+                    });
+                }
+            }, this.rhythmDelay);
+        }, this.rhythmDelay);
     }
     
     showCommand(text, type) {
