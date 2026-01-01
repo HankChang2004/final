@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投球動作分析系統</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚾ 投球動作分析系統</h1>
+            <p class="subtitle">上傳影片，標記抬腳和球離手的時間點進行分析</p>
+        </header>
+
+        <main>
+            <!-- 步驟 1: 上傳影片 -->
+            <section class="step" id="step1">
+                <div class="step-header">
+                    <span class="step-number">1</span>
+                    <h2>上傳影片</h2>
+                </div>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="videoInput" accept="video/*" hidden>
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>點擊或拖曳影片至此處</p>
+                        <span class="upload-hint">支援 MP4, MOV, AVI 等格式</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 步驟 2: 標記時間點 -->
+            <section class="step" id="step2" style="display: none;">
+                <div class="step-header">
+                    <span class="step-number">2</span>
+                    <h2>標記時間點</h2>
+                </div>
+                
+                <div class="video-container">
+                    <video id="videoPlayer" controls></video>
+                </div>
+
+                <div class="timeline-container">
+                    <div class="timeline" id="timeline">
+                        <div class="timeline-marker start-marker" id="startMarker" style="display: none;">
+                            <div class="marker-line"></div>
+                            <div class="marker-label">抬腳</div>
+                        </div>
+                        <div class="timeline-marker end-marker" id="endMarker" style="display: none;">
+                            <div class="marker-line"></div>
+                            <div class="marker-label">離手</div>
+                        </div>
+                        <div class="timeline-progress" id="timelineProgress"></div>
+                    </div>
+                </div>
+
+                <div class="time-controls">
+                    <div class="time-input-group">
+                        <label>抬腳時間</label>
+                        <div class="time-display">
+                            <span id="startTimeDisplay">--:--:---</span>
+                            <button class="btn btn-mark" id="markStartBtn">標記當前時間</button>
+                        </div>
+                    </div>
+                    <div class="time-input-group">
+                        <label>球離手時間</label>
+                        <div class="time-display">
+                            <span id="endTimeDisplay">--:--:---</span>
+                            <button class="btn btn-mark" id="markEndBtn">標記當前時間</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="playback-controls">
+                    <button class="btn btn-control" id="prevFrameBtn">⏮ 上一幀</button>
+                    <button class="btn btn-control" id="playPauseBtn">▶ 播放</button>
+                    <button class="btn btn-control" id="nextFrameBtn">下一幀 ⏭</button>
+                    <div class="speed-control">
+                        <label>播放速度:</label>
+                        <select id="playbackSpeed">
+                            <option value="0.25">0.25x</option>
+                            <option value="0.5">0.5x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="resetBtn">重新選擇影片</button>
+                    <button class="btn btn-primary" id="analyzeBtn" disabled>開始分析</button>
+                </div>
+            </section>
+
+            <!-- 步驟 3: 分析結果 -->
+            <section class="step" id="step3" style="display: none;">
+                <div class="step-header">
+                    <span class="step-number">3</span>
+                    <h2>分析結果</h2>
+                </div>
+                
+                <div class="loading" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <p id="loadingText">正在處理影片...</p>
+                </div>
+
+                <div class="result-container" id="resultContainer" style="display: none;">
+                    <div class="result-info">
+                        <h3>分析完成！</h3>
+                        <p id="resultMessage"></p>
+                    </div>
+                    <div class="result-actions">
+                        <button class="btn btn-primary" id="newAnalysisBtn">進行新的分析</button>
+                    </div>
+                </div>
+
+                <div class="error-container" id="errorContainer" style="display: none;">
+                    <div class="error-icon">❌</div>
+                    <h3>處理失敗</h3>
+                    <p id="errorMessage"></p>
+                    <button class="btn btn-secondary" id="retryBtn">重試</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>投球動作分析系統 © 2026</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
