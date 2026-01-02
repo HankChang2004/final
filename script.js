@@ -1,8 +1,5 @@
-// 投球動作分析系統 - 前端 JavaScript
-
 class PitchingAnalyzer {
     constructor() {
-        // 元素引用
         this.videoInput = document.getElementById('videoInput');
         this.uploadArea = document.getElementById('uploadArea');
         this.videoPlayer = document.getElementById('videoPlayer');
@@ -29,19 +26,16 @@ class PitchingAnalyzer {
         this.errorContainer = document.getElementById('errorContainer');
         this.errorMessage = document.getElementById('errorMessage');
 
-        // 步驟區塊
         this.step1 = document.getElementById('step1');
         this.step2 = document.getElementById('step2');
         this.step3 = document.getElementById('step3');
 
-        // 狀態
         this.videoFile = null;
         this.startTime = null;
         this.endTime = null;
-        this.frameRate = 30; // 預設幀率
+        this.frameRate = 30;
         this.backendUrl = 'https://unirritably-unfoul-chere.ngrok-free.dev';
 
-        // 初始化
         this.init();
     }
 
@@ -50,27 +44,22 @@ class PitchingAnalyzer {
     }
 
     bindEvents() {
-        // 上傳區域事件
         this.uploadArea.addEventListener('click', () => this.videoInput.click());
         this.uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
         this.uploadArea.addEventListener('dragleave', () => this.uploadArea.classList.remove('dragover'));
         this.uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
         this.videoInput.addEventListener('change', (e) => this.handleFileSelect(e));
 
-        // 影片播放器事件
         this.videoPlayer.addEventListener('loadedmetadata', () => this.onVideoLoaded());
         this.videoPlayer.addEventListener('timeupdate', () => this.updateTimeline());
         this.videoPlayer.addEventListener('play', () => this.updatePlayButton(true));
         this.videoPlayer.addEventListener('pause', () => this.updatePlayButton(false));
 
-        // 時間軸點擊
         this.timeline.addEventListener('click', (e) => this.seekToPosition(e));
 
-        // 標記按鈕
         this.markStartBtn.addEventListener('click', () => this.markStartTime());
         this.markEndBtn.addEventListener('click', () => this.markEndTime());
 
-        // 播放控制
         this.prevFrameBtn.addEventListener('click', () => this.stepFrame(-1));
         this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
         this.nextFrameBtn.addEventListener('click', () => this.stepFrame(1));
@@ -78,13 +67,11 @@ class PitchingAnalyzer {
             this.videoPlayer.playbackRate = parseFloat(e.target.value);
         });
 
-        // 操作按鈕
         this.resetBtn.addEventListener('click', () => this.reset());
         this.analyzeBtn.addEventListener('click', () => this.startAnalysis());
         this.newAnalysisBtn.addEventListener('click', () => this.reset());
         this.retryBtn.addEventListener('click', () => this.startAnalysis());
 
-        // 鍵盤快捷鍵
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
     }
 
@@ -117,7 +104,6 @@ class PitchingAnalyzer {
     }
 
     onVideoLoaded() {
-        // 嘗試獲取幀率（如果可用）
         console.log(`影片已載入，時長: ${this.videoPlayer.duration.toFixed(2)}秒`);
         this.resetMarkers();
     }
@@ -187,7 +173,7 @@ class PitchingAnalyzer {
     }
 
     updatePlayButton(isPlaying) {
-        this.playPauseBtn.textContent = isPlaying ? '⏸ 暫停' : '▶ 播放';
+        this.playPauseBtn.textContent = isPlaying ? '暫停' : '播放';
     }
 
     handleKeyboard(e) {
@@ -284,11 +270,26 @@ class PitchingAnalyzer {
     showSuccess(result) {
         this.loadingIndicator.style.display = 'none';
         this.resultContainer.style.display = 'block';
-        this.resultMessage.innerHTML = `
+
+        let resultHTML = `
             <p>影片已成功裁剪並進行動作分析！</p>
             <p><strong>處理時間:</strong> ${result.duration || '未知'}</p>
-            <p><strong>輸出路徑:</strong> ${result.output_path || '~/project/motionbert_output/'}</p>
         `;
+
+        if (result.predicted_speed_mph) {
+            resultHTML += `
+                <div class="speed-result">
+                    <h3>預測球速</h3>
+                    <div class="speed-display">
+                        <span class="speed-value">${result.predicted_speed_mph.toFixed(1)}</span>
+                        <span class="speed-unit">mph</span>
+                    </div>
+                    <p class="speed-kmh">約 ${result.predicted_speed_kmh} km/h</p>
+                </div>
+            `;
+        }
+
+        this.resultMessage.innerHTML = resultHTML;
     }
 
     showError(message) {
@@ -298,7 +299,6 @@ class PitchingAnalyzer {
     }
 }
 
-// 初始化應用
 document.addEventListener('DOMContentLoaded', () => {
     new PitchingAnalyzer();
 });

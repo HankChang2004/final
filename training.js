@@ -1,177 +1,168 @@
-// 揮棒反應訓練系統
-
 class SwingTraining {
     constructor() {
-        // 元素引用
         this.startTrainingBtn = document.getElementById('startTrainingBtn');
         this.pauseBtn = document.getElementById('pauseBtn');
         this.stopTrainingBtn = document.getElementById('stopTrainingBtn');
         this.restartBtn = document.getElementById('restartBtn');
         this.backToSettingsBtn = document.getElementById('backToSettingsBtn');
-        
+
         this.roundCountSelect = document.getElementById('roundCount');
         this.intervalTimeSelect = document.getElementById('intervalTime');
         this.goRatioSelect = document.getElementById('goRatio');
         this.rhythmSpeedSelect = document.getElementById('rhythmSpeed');
-        
+
         this.currentRoundEl = document.getElementById('currentRound');
         this.totalRoundsEl = document.getElementById('totalRounds');
         this.commandDisplay = document.getElementById('commandDisplay');
         this.visualIndicator = document.getElementById('visualIndicator');
         this.indicatorCircle = this.visualIndicator.querySelector('.indicator-circle');
         this.countdownDisplay = document.getElementById('countdownDisplay');
-        
+
         this.totalRoundsResult = document.getElementById('totalRoundsResult');
         this.goCountEl = document.getElementById('goCount');
         this.stopCountEl = document.getElementById('stopCount');
-        
+
+        this.successInput = document.getElementById('successInput');
+        this.failInput = document.getElementById('failInput');
+        this.saveResultBtn = document.getElementById('saveResultBtn');
+        this.clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        this.historyTotal = document.getElementById('historyTotal');
+        this.historySuccess = document.getElementById('historySuccess');
+        this.historyRate = document.getElementById('historyRate');
+
         this.settingsSection = document.getElementById('settingsSection');
         this.trainingSection = document.getElementById('trainingSection');
         this.resultSection = document.getElementById('resultSection');
-        
-        // 狀態
+
         this.isRunning = false;
         this.isPaused = false;
         this.currentRound = 0;
         this.totalRounds = 10;
         this.intervalTime = 3;
         this.goRatio = 50;
-        this.rhythmDelay = 700; // 節奏間隔（毫秒）
+        this.rhythmDelay = 700;
         this.goCount = 0;
         this.stopCount = 0;
         this.timeoutId = null;
-        
-        // 語音合成
+
         this.synth = window.speechSynthesis;
         this.voices = [];
-        
-        // 初始化
+
         this.init();
     }
-    
+
     init() {
         this.loadVoices();
         this.bindEvents();
     }
-    
+
     loadVoices() {
-        // 載入可用的語音
         this.voices = this.synth.getVoices();
-        
-        // 如果語音列表尚未載入，等待載入完成
+
         if (this.voices.length === 0) {
             this.synth.addEventListener('voiceschanged', () => {
                 this.voices = this.synth.getVoices();
             });
         }
     }
-    
+
     bindEvents() {
         this.startTrainingBtn.addEventListener('click', () => this.startTraining());
         this.pauseBtn.addEventListener('click', () => this.togglePause());
         this.stopTrainingBtn.addEventListener('click', () => this.stopTraining());
         this.restartBtn.addEventListener('click', () => this.startTraining());
         this.backToSettingsBtn.addEventListener('click', () => this.showSection('settings'));
+
+        this.saveResultBtn.addEventListener('click', () => this.saveResult());
+        this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
     }
-    
+
     showSection(section) {
         this.settingsSection.style.display = section === 'settings' ? 'block' : 'none';
         this.trainingSection.style.display = section === 'training' ? 'block' : 'none';
         this.resultSection.style.display = section === 'result' ? 'block' : 'none';
     }
-    
+
     speak(text, callback) {
-        // 取消任何正在進行的語音
         this.synth.cancel();
-        
+
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.2; // 固定語音速度
+        utterance.rate = 1.2;
         utterance.pitch = 1;
         utterance.volume = 1;
-        
-        // 嘗試使用中文語音
-        const chineseVoice = this.voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
-        if (chineseVoice) {
-            utterance.voice = chineseVoice;
+        utterance.lang = 'en-US';
+
+        const englishVoice = this.voices.find(v => v.lang.includes('en-US') || v.lang.includes('en'));
+        if (englishVoice) {
+            utterance.voice = englishVoice;
         }
-        
+
         if (callback) {
             utterance.onend = callback;
         }
-        
+
         this.synth.speak(utterance);
     }
-    
+
     startTraining() {
         // 讀取設定
         this.totalRounds = parseInt(this.roundCountSelect.value);
         this.intervalTime = parseInt(this.intervalTimeSelect.value);
         this.goRatio = parseInt(this.goRatioSelect.value);
         this.rhythmDelay = parseInt(this.rhythmSpeedSelect.value);
-        
-        // 重置狀態
+
         this.currentRound = 0;
         this.goCount = 0;
         this.stopCount = 0;
         this.isRunning = true;
         this.isPaused = false;
-        
-        // 更新 UI
+
         this.totalRoundsEl.textContent = this.totalRounds === 0 ? '∞' : this.totalRounds;
         this.updateRoundDisplay();
         this.showSection('training');
         this.updatePauseButton();
-        
-        // 開始訓練
+
         this.commandDisplay.textContent = '準備...';
         this.commandDisplay.className = 'command-display';
         this.indicatorCircle.className = 'indicator-circle ready';
         this.indicatorCircle.textContent = '';
-        
-        // 延遲開始第一回合
+
         setTimeout(() => {
             if (this.isRunning) {
                 this.runRound();
             }
         }, 2000);
     }
-    
+
     runRound() {
         if (!this.isRunning || this.isPaused) return;
-        
-        // 檢查是否已完成所有回合
+
         if (this.totalRounds > 0 && this.currentRound >= this.totalRounds) {
             this.finishTraining();
             return;
         }
-        
+
         this.currentRound++;
         this.updateRoundDisplay();
-        
-        // 決定這回合是 GO 還是 STOP
+
         const isGo = Math.random() * 100 < this.goRatio;
-        
-        // 開始倒數序列：1 -> 2 -> GO/STOP
+
         this.playSequence(isGo);
     }
-    
+
     playSequence(isGo) {
-        // 顯示和播放 "1"
         this.showCommand('1', 'counting');
         this.speak('1');
-        
-        // 使用節奏延遲控制間隔
+
         setTimeout(() => {
             if (!this.isRunning || this.isPaused) return;
-            
-            // 顯示和播放 "2"
+
             this.showCommand('2', 'counting');
             this.speak('2');
-            
+
             setTimeout(() => {
                 if (!this.isRunning || this.isPaused) return;
-                
-                // 顯示 GO 或 STOP
+
                 if (isGo) {
                     this.showCommand('GO!', 'go');
                     this.goCount++;
@@ -188,27 +179,26 @@ class SwingTraining {
             }, this.rhythmDelay);
         }, this.rhythmDelay);
     }
-    
+
     showCommand(text, type) {
         this.commandDisplay.textContent = text;
         this.commandDisplay.className = `command-display ${type}`;
         this.indicatorCircle.className = `indicator-circle ${type}`;
         this.indicatorCircle.textContent = text;
     }
-    
+
     scheduleNextRound() {
         if (!this.isRunning) return;
-        
-        // 顯示倒數計時
+
         let countdown = this.intervalTime;
         this.countdownDisplay.textContent = `下一回合: ${countdown}秒`;
-        
+
         const countdownInterval = setInterval(() => {
             if (!this.isRunning || this.isPaused) {
                 clearInterval(countdownInterval);
                 return;
             }
-            
+
             countdown--;
             if (countdown > 0) {
                 this.countdownDisplay.textContent = `下一回合: ${countdown}秒`;
@@ -217,8 +207,7 @@ class SwingTraining {
                 clearInterval(countdownInterval);
             }
         }, 1000);
-        
-        // 重置顯示
+
         setTimeout(() => {
             if (this.isRunning && !this.isPaused) {
                 this.commandDisplay.textContent = '準備...';
@@ -227,25 +216,23 @@ class SwingTraining {
                 this.indicatorCircle.textContent = '';
             }
         }, 1500);
-        
-        // 安排下一回合
+
         this.timeoutId = setTimeout(() => {
             if (this.isRunning && !this.isPaused) {
                 this.runRound();
             }
         }, this.intervalTime * 1000);
     }
-    
+
     updateRoundDisplay() {
         this.currentRoundEl.textContent = this.currentRound;
     }
-    
+
     togglePause() {
         this.isPaused = !this.isPaused;
         this.updatePauseButton();
-        
+
         if (this.isPaused) {
-            // 暫停
             this.synth.cancel();
             if (this.timeoutId) {
                 clearTimeout(this.timeoutId);
@@ -253,7 +240,6 @@ class SwingTraining {
             this.commandDisplay.textContent = '已暫停';
             this.countdownDisplay.textContent = '點擊繼續按鈕恢復訓練';
         } else {
-            // 繼續
             this.commandDisplay.textContent = '準備...';
             this.countdownDisplay.textContent = '';
             setTimeout(() => {
@@ -263,11 +249,11 @@ class SwingTraining {
             }, 1500);
         }
     }
-    
+
     updatePauseButton() {
-        this.pauseBtn.textContent = this.isPaused ? '▶️ 繼續' : '⏸️ 暫停';
+        this.pauseBtn.textContent = this.isPaused ? '繼續' : '暫停';
     }
-    
+
     stopTraining() {
         this.isRunning = false;
         this.synth.cancel();
@@ -276,27 +262,95 @@ class SwingTraining {
         }
         this.finishTraining();
     }
-    
+
     finishTraining() {
         this.isRunning = false;
         this.synth.cancel();
-        
-        // 更新結果
+
         this.totalRoundsResult.textContent = this.currentRound;
         this.goCountEl.textContent = this.goCount;
         this.stopCountEl.textContent = this.stopCount;
-        
-        // 顯示結果頁面
+
+        this.successInput.value = 0;
+        this.failInput.value = 0;
+
+        this.loadHistory();
+
         this.showSection('result');
-        
-        // 播放完成語音
-        setTimeout(() => {
-            this.speak(`訓練完成！共 ${this.currentRound} 回合，GO ${this.goCount} 次，STOP ${this.stopCount} 次。`);
-        }, 500);
+    }
+
+    saveResult() {
+        const success = parseInt(this.successInput.value) || 0;
+        const fail = parseInt(this.failInput.value) || 0;
+
+        if (success === 0 && fail === 0) {
+            alert('請輸入成功或失敗次數！');
+            return;
+        }
+
+        if (success + fail > this.currentRound) {
+            alert(`錯誤：成功+失敗次數 (${success + fail}) 不能超過訓練回合數 (${this.currentRound})！`);
+            return;
+        }
+
+        const history = this.getHistory();
+
+        history.records.push({
+            date: new Date().toISOString(),
+            rounds: this.currentRound,
+            goCount: this.goCount,
+            stopCount: this.stopCount,
+            success: success,
+            fail: fail
+        });
+
+        history.totalSuccess += success;
+        history.totalFail += fail;
+        history.totalAttempts += (success + fail);
+
+        localStorage.setItem('swingTrainingHistory', JSON.stringify(history));
+
+        this.loadHistory();
+
+        alert('結果已儲存！');
+    }
+
+    getHistory() {
+        const stored = localStorage.getItem('swingTrainingHistory');
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        return {
+            records: [],
+            totalSuccess: 0,
+            totalFail: 0,
+            totalAttempts: 0
+        };
+    }
+
+    loadHistory() {
+        const history = this.getHistory();
+
+        this.historyTotal.textContent = history.totalAttempts;
+        this.historySuccess.textContent = history.totalSuccess;
+
+        if (history.totalAttempts > 0) {
+            const rate = (history.totalSuccess / history.totalAttempts * 100).toFixed(1);
+            this.historyRate.textContent = `${rate}%`;
+        } else {
+            this.historyRate.textContent = '--%';
+        }
+    }
+
+    clearHistory() {
+        if (confirm('確定要清除所有歷史記錄嗎？')) {
+            localStorage.removeItem('swingTrainingHistory');
+            this.loadHistory();
+            alert('歷史記錄已清除！');
+        }
     }
 }
 
-// 初始化應用
 document.addEventListener('DOMContentLoaded', () => {
     new SwingTraining();
 });

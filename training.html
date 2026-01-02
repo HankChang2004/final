@@ -11,18 +11,17 @@
     <div class="container">
         <header>
             <nav class="nav-bar">
-                <a href="index.html" class="nav-link">⚾ 動作分析</a>
-                <a href="training.html" class="nav-link active">🏋️ 揮棒訓練</a>
+                <a href="index.html" class="nav-link">動作分析</a>
+                <a href="training.html" class="nav-link active">揮棒訓練</a>
             </nav>
-            <h1>🏏 揮棒反應訓練</h1>
+            <h1>揮棒反應訓練</h1>
             <p class="subtitle">訓練你的揮棒決策能力 - 聽到 GO 就揮棒，聽到 STOP 就收棒</p>
         </header>
 
         <main>
-            <!-- 訓練設定 -->
             <section class="step" id="settingsSection">
                 <div class="step-header">
-                    <span class="step-number">⚙️</span>
+                    <span class="step-number">1</span>
                     <h2>訓練設定</h2>
                 </div>
                 
@@ -34,7 +33,7 @@
                             <option value="10" selected>10 回合</option>
                             <option value="15">15 回合</option>
                             <option value="20">20 回合</option>
-                            <option value="0">無限模式</option>
+                            <option value="0">練到吐</option>
                         </select>
                     </div>
                     
@@ -70,12 +69,11 @@
 
                 <div class="action-buttons">
                     <button class="btn btn-primary btn-large" id="startTrainingBtn">
-                        ▶️ 開始訓練
+                        開始訓練
                     </button>
                 </div>
             </section>
 
-            <!-- 訓練進行中 -->
             <section class="step" id="trainingSection" style="display: none;">
                 <div class="training-display">
                     <div class="round-info">
@@ -96,15 +94,14 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-secondary" id="pauseBtn">⏸️ 暫停</button>
-                    <button class="btn btn-danger" id="stopTrainingBtn">⏹️ 結束訓練</button>
+                    <button class="btn btn-secondary" id="pauseBtn">暫停</button>
+                    <button class="btn btn-danger" id="stopTrainingBtn">結束訓練</button>
                 </div>
             </section>
 
-            <!-- 訓練結果 -->
             <section class="step" id="resultSection" style="display: none;">
                 <div class="step-header">
-                    <span class="step-number">📊</span>
+                    <span class="step-number">2</span>
                     <h2>訓練完成</h2>
                 </div>
                 
@@ -123,16 +120,46 @@
                     </div>
                 </div>
 
+                <div class="user-input-section">
+                    <h4>記錄你的表現</h4>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="successInput">成功次數</label>
+                            <input type="number" id="successInput" min="0" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label for="failInput">失敗次數</label>
+                            <input type="number" id="failInput" min="0" value="0">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" id="saveResultBtn">儲存結果</button>
+                </div>
+
+                <div class="history-section">
+                    <h4>歷史成功率</h4>
+                    <div class="history-summary">
+                        <div class="history-stat">
+                            <span class="history-label">總訓練次數</span>
+                            <span class="history-value" id="historyTotal">0</span>
+                        </div>
+                        <div class="history-stat">
+                            <span class="history-label">總成功次數</span>
+                            <span class="history-value" id="historySuccess">0</span>
+                        </div>
+                        <div class="history-stat">
+                            <span class="history-label">歷史成功率</span>
+                            <span class="history-value" id="historyRate">--%</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-small btn-outline" id="clearHistoryBtn">清除歷史</button>
+                </div>
+
                 <div class="action-buttons">
-                    <button class="btn btn-primary" id="restartBtn">🔄 再次訓練</button>
-                    <button class="btn btn-secondary" id="backToSettingsBtn">⚙️ 調整設定</button>
+                    <button class="btn btn-primary" id="restartBtn">再次訓練</button>
+                    <button class="btn btn-secondary" id="backToSettingsBtn">調整設定</button>
                 </div>
             </section>
         </main>
-
-        <footer>
-            <p>棒球訓練系統 © 2026</p>
-        </footer>
     </div>
 
     <script src="training.js"></script>

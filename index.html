@@ -11,15 +11,14 @@
     <div class="container">
         <header>
             <nav class="nav-bar">
-                <a href="index.html" class="nav-link active">⚾ 動作分析</a>
-                <a href="training.html" class="nav-link">🏋️ 揮棒訓練</a>
+                <a href="index.html" class="nav-link active">動作分析</a>
+                <a href="training.html" class="nav-link">揮棒訓練</a>
             </nav>
-            <h1>⚾ 投球動作分析系統</h1>
+            <h1>投球動作分析系統</h1>
             <p class="subtitle">上傳影片，標記抬腳和球離手的時間點進行分析</p>
         </header>
 
         <main>
-            <!-- 步驟 1: 上傳影片 -->
             <section class="step" id="step1">
                 <div class="step-header">
                     <span class="step-number">1</span>
@@ -28,14 +27,13 @@
                 <div class="upload-area" id="uploadArea">
                     <input type="file" id="videoInput" accept="video/*" hidden>
                     <div class="upload-content">
-                        <div class="upload-icon">📁</div>
+                        <div class="upload-icon">+</div>
                         <p>點擊或拖曳影片至此處</p>
                         <span class="upload-hint">支援 MP4, MOV, AVI 等格式</span>
                     </div>
                 </div>
             </section>
 
-            <!-- 步驟 2: 標記時間點 -->
             <section class="step" id="step2" style="display: none;">
                 <div class="step-header">
                     <span class="step-number">2</span>
@@ -78,9 +76,9 @@
                 </div>
 
                 <div class="playback-controls">
-                    <button class="btn btn-control" id="prevFrameBtn">⏮ 上一幀</button>
-                    <button class="btn btn-control" id="playPauseBtn">▶ 播放</button>
-                    <button class="btn btn-control" id="nextFrameBtn">下一幀 ⏭</button>
+                    <button class="btn btn-control" id="prevFrameBtn">上一幀</button>
+                    <button class="btn btn-control" id="playPauseBtn">播放</button>
+                    <button class="btn btn-control" id="nextFrameBtn">下一幀</button>
                     <div class="speed-control">
                         <label>播放速度:</label>
                         <select id="playbackSpeed">
@@ -99,7 +97,6 @@
                 </div>
             </section>
 
-            <!-- 步驟 3: 分析結果 -->
             <section class="step" id="step3" style="display: none;">
                 <div class="step-header">
                     <span class="step-number">3</span>
@@ -122,17 +119,13 @@
                 </div>
 
                 <div class="error-container" id="errorContainer" style="display: none;">
-                    <div class="error-icon">❌</div>
+                    <div class="error-icon">X</div>
                     <h3>處理失敗</h3>
                     <p id="errorMessage"></p>
                     <button class="btn btn-secondary" id="retryBtn">重試</button>
                 </div>
             </section>
         </main>
-
-        <footer>
-            <p>投球動作分析系統 © 2026</p>
-        </footer>
     </div>
 
     <script src="script.js"></script>
